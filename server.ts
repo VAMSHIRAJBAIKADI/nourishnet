@@ -33,7 +33,7 @@ import {
   requireAdmin
 } from './server/middleware/auth';
 
-import { connectMongoDB, isMongoActive } from './server/mongo';
+import { connectMongoDB, isMongoActive, getMongoConnectionInfo } from './server/mongo';
 
 async function startServer() {
   const app = express();
@@ -77,7 +77,19 @@ async function startServer() {
       status: 'healthy',
       database: isMongoActive() ? 'MongoDB (Mongoose)' : 'Local File Persistence (data/database.json)',
       mongoConnected: isMongoActive(),
+      mongoDetails: getMongoConnectionInfo(),
       timestamp: new Date().toISOString()
+    });
+  });
+
+  // Re-test MongoDB connection on demand
+  apiRouter.post('/mongo/retry', async (req, res) => {
+    const success = await connectMongoDB();
+    res.json({
+      success,
+      database: isMongoActive() ? 'MongoDB (Mongoose)' : 'Local File Persistence (data/database.json)',
+      mongoConnected: isMongoActive(),
+      mongoDetails: getMongoConnectionInfo()
     });
   });
 

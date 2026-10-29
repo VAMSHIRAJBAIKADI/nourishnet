@@ -11,9 +11,11 @@ import {
   WifiOff,
   AlertTriangle,
   UserCheck,
-  Github
+  Github,
+  Database
 } from 'lucide-react';
 import { GitHubExportModal } from './common/GitHubExportModal';
+import { DatabaseStatusModal } from './common/DatabaseStatusModal';
 
 interface HeaderProps {
   onOpenSafetyModal: () => void;
@@ -38,6 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
   } = useApp();
 
   const [isGitHubModalOpen, setIsGitHubModalOpen] = useState(false);
+  const [isDbModalOpen, setIsDbModalOpen] = useState(false);
 
   const pendingDonorRequests = currentUser
     ? requests.filter((r) => r.donorId === currentUser.id && r.status === 'PENDING').length
@@ -163,6 +166,16 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </div>
 
+          {/* Database Engine Status Button */}
+          <button
+            onClick={() => setIsDbModalOpen(true)}
+            title="View Database Engine & MongoDB Connection Status"
+            className="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-600 font-medium px-2 py-1 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 transition-colors cursor-pointer"
+          >
+            <Database className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Database</span>
+          </button>
+
           {/* User Account / Auth Modal Trigger */}
           {isAuthenticated && currentUser ? (
             <div className="flex items-center gap-2">
@@ -228,6 +241,12 @@ export const Header: React.FC<HeaderProps> = ({
       <GitHubExportModal
         isOpen={isGitHubModalOpen}
         onClose={() => setIsGitHubModalOpen(false)}
+      />
+
+      {/* Database Status & Config Modal */}
+      <DatabaseStatusModal
+        isOpen={isDbModalOpen}
+        onClose={() => setIsDbModalOpen(false)}
       />
     </header>
   );

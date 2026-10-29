@@ -1,42 +1,114 @@
 import mongoose from 'mongoose';
-import { UserModel, ListingModel, RequestModel, AuditLogModel } from './models';
+import { UserModel, ListingModel, RequestModel, AuditLogModel } from './models/index';
 import { UserRecord, ListingRecord, RequestRecord, AuditLogRecord } from './types';
 
 let isConnected = false;
+
+export interface MongoConnectionStatus {
+  isConnected: boolean;
+  uriConfigured: boolean;
+  status: 'CONNECTED' | 'FALLBACK_LOCAL' | 'NOT_CONFIGURED' | 'INITIALIZING';
+  reason: string | null;
+  ipWhitelistHelp: boolean;
+  lastChecked: string;
+}
+
+let mongoConnectionInfo: MongoConnectionStatus = {
+  isConnected: false,
+  uriConfigured: false,
+  status: 'INITIALIZING',
+  reason: null,
+  ipWhitelistHelp: false,
+  lastChecked: new Date().toISOString()
+};
 
 export async function connectMongoDB(): Promise<boolean> {
   const uri = process.env.MONGODB_URI;
 
   if (!uri) {
-    console.log('ℹ️  MONGODB_URI not specified. Using high-performance disk-persisted database store (data/database.json).');
+    mongoConnectionInfo = {
+      isConnected: false,
+      uriConfigured: false,
+      status: 'NOT_CONFIGURED',
+      reason: 'No MONGODB_URI environment variable provided',
+      ipWhitelistHelp: false,
+      lastChecked: new Date().toISOString()
+    };
+    console.log('ℹ️ [Database] MONGODB_URI not specified. Operating in high-performance disk-persisted database store (data/database.json).');
     return false;
   }
 
+  mongoConnectionInfo.uriConfigured = true;
+
   try {
-    console.log(`⏳ Connecting to MongoDB at ${uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')}...`);
+    const maskedUri = uri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
+    console.log(`⏳ [Database] Attempting connection to MongoDB at ${maskedUri}...`);
     
-    // Set 4 second connection timeout so boot is never blocked if an offline URI is given
+    // Set 2500ms connection timeout so startup is fast and never blocked
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 4000,
-      connectTimeoutMS: 4000
+      serverSelectionTimeoutMS: 2500,
+      connectTimeoutMS: 2500
     });
 
     isConnected = true;
-    console.log('✅ Successfully connected to MongoDB via Mongoose!');
+    mongoConnectionInfo = {
+      isConnected: true,
+      uriConfigured: true,
+      status: 'CONNECTED',
+      reason: null,
+      ipWhitelistHelp: false,
+      lastChecked: new Date().toISOString()
+    };
+    console.log('✅ [Database] Successfully connected to MongoDB via Mongoose!');
 
     // Initialize collections if empty
     await seedMongoIfEmpty();
 
     return true;
   } catch (err: any) {
-    console.warn(`⚠️ MongoDB connection failed: ${err.message}. Seamlessly falling back to persistent local store.`);
+    const isWhitelistIssue =
+      err.message?.includes('whitelist') ||
+      err.message?.includes('Could not connect to any servers') ||
+      err.name === 'MongoServerSelectionError';
+
+    // Safely disconnect any failed or hanging socket attempts
+    try {
+      await mongoose.disconnect();
+    } catch {
+      // ignore
+    }
+
     isConnected = false;
+    mongoConnectionInfo = {
+      isConnected: false,
+      uriConfigured: true,
+      status: 'FALLBACK_LOCAL',
+      reason: isWhitelistIssue
+        ? 'MongoDB Atlas Network Access restriction: Cloud IP is not on the Atlas IP Whitelist.'
+        : err.message || 'Remote database unreachable',
+      ipWhitelistHelp: isWhitelistIssue,
+      lastChecked: new Date().toISOString()
+    };
+
+    console.log(
+      `ℹ️ [Database] MongoDB Atlas connection deferred (${
+        isWhitelistIssue ? 'IP Access List restriction' : 'cluster offline'
+      }). High-performance persistent JSON store active (data/database.json).`
+    );
+    if (isWhitelistIssue) {
+      console.log('💡 [Database Tip] To connect live to Atlas: Go to MongoDB Atlas > Network Access > Add IP Address > Allow Access from Anywhere (0.0.0.0/0).');
+    }
+
     return false;
   }
 }
 
 export function isMongoActive(): boolean {
   return isConnected && mongoose.connection.readyState === 1;
+}
+
+export function getMongoConnectionInfo(): MongoConnectionStatus {
+  return mongoConnectionInfo;
 }
 
 // Seed MongoDB collections from default data if empty
