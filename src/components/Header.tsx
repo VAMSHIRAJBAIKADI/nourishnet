@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   HeartHandshake,
@@ -10,8 +10,10 @@ import {
   Wifi,
   WifiOff,
   AlertTriangle,
-  UserCheck
+  UserCheck,
+  Github
 } from 'lucide-react';
+import { GitHubExportModal } from './common/GitHubExportModal';
 
 interface HeaderProps {
   onOpenSafetyModal: () => void;
@@ -34,6 +36,8 @@ export const Header: React.FC<HeaderProps> = ({
     listings,
     addToast
   } = useApp();
+
+  const [isGitHubModalOpen, setIsGitHubModalOpen] = useState(false);
 
   const pendingDonorRequests = currentUser
     ? requests.filter((r) => r.donorId === currentUser.id && r.status === 'PENDING').length
@@ -199,16 +203,32 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           )}
 
+          {/* GitHub / Export Button */}
+          <button
+            onClick={() => setIsGitHubModalOpen(true)}
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
+            title="Push directly to GitHub or Download Code ZIP"
+          >
+            <Github className="w-3.5 h-3.5 text-slate-900" />
+            <span className="hidden sm:inline">Push to GitHub</span>
+          </button>
+
           {/* Safety Button */}
           <button
             onClick={onOpenSafetyModal}
             className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
           >
             <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
-            <span>Safety Rules</span>
+            <span>Safety</span>
           </button>
         </div>
       </div>
+
+      {/* GitHub Export Modal */}
+      <GitHubExportModal
+        isOpen={isGitHubModalOpen}
+        onClose={() => setIsGitHubModalOpen(false)}
+      />
     </header>
   );
 };
