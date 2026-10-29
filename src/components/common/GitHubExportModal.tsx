@@ -22,9 +22,9 @@ export const GitHubExportModal: React.FC<GitHubExportModalProps> = ({ isOpen, on
   const [activeTab, setActiveTab] = useState<'push' | 'download' | 'instructions'>('push');
   
   // Push state
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState('VAMSHIRAJBAIKADI');
   const [repoName, setRepoName] = useState('nourishnet');
-  const [repoUrl, setRepoUrl] = useState('');
+  const [repoUrl, setRepoUrl] = useState('https://github.com/VAMSHIRAJBAIKADI/nourishnet.git');
   const [token, setToken] = useState('');
   const [isPushing, setIsPushing] = useState(false);
   const [pushStatus, setPushStatus] = useState<{
