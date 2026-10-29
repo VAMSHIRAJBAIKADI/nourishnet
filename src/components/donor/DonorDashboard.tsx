@@ -324,12 +324,12 @@ export const DonorDashboard: React.FC = () => {
                 return (
                   <div
                     key={listing.id}
-                    className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:shadow-sm transition-shadow relative"
+                    className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:p-5 shadow-xs flex flex-col justify-between space-y-4 hover:shadow-sm transition-shadow relative overflow-hidden"
                   >
                     <div className="space-y-3">
                       {/* Top metadata */}
                       <div className="flex items-center justify-between text-xs text-slate-500">
-                        <div className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] uppercase tracking-wider">
+                        <div className="flex flex-wrap items-center gap-1.5 font-semibold text-slate-700 text-[11px] uppercase tracking-wider">
                           {listing.category && (
                             <>
                               <span>{listing.category}</span>
@@ -345,9 +345,9 @@ export const DonorDashboard: React.FC = () => {
                       </div>
 
                       {/* Content with optional square photo */}
-                      <div className="flex items-start gap-4">
+                      <div className="flex items-start gap-3 sm:gap-4">
                         {isFirstCard && (
-                          <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-slate-100 shadow-2xs">
+                          <div className="relative shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-slate-100 shadow-2xs">
                             <img
                               src="/src/assets/images/prepared_catering_meals_1793181937634.jpg"
                               alt="Gourmet Herb-Roasted Chicken & Vegetables"
@@ -358,27 +358,27 @@ export const DonorDashboard: React.FC = () => {
                         )}
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-base font-bold text-slate-900 leading-snug">
+                          <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug break-words">
                             {listing.title}
                           </h3>
 
-                          <p className="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed break-words">
                             {listing.description}
                           </p>
                         </div>
                       </div>
 
                       {/* Quantity metrics box */}
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
-                        <div>
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs gap-2">
+                        <div className="min-w-0">
                           <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
                             Quantity
                           </span>
-                          <span className="font-bold text-slate-900">
+                          <span className="font-bold text-slate-900 truncate block">
                             {isFirstCard ? '45' : isSecondCard ? '40 assorted pastries & bagels' : listing.quantity}
                           </span>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right shrink-0">
                           <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
                             Meals / Weight
                           </span>
@@ -389,25 +389,25 @@ export const DonorDashboard: React.FC = () => {
                       </div>
 
                       {listing.flagReason && (
-                        <div className="p-2 bg-amber-50 rounded border border-amber-200 text-[11px] text-amber-900 font-medium">
+                        <div className="p-2 bg-amber-50 rounded border border-amber-200 text-[11px] text-amber-900 font-medium break-words">
                           {listing.flagReason}
                         </div>
                       )}
                     </div>
 
                     {/* Bottom row */}
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 relative">
+                    <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2.5 relative">
                       <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
                         <span className="text-xs font-bold text-emerald-700">
                           Status: Live & Available
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 relative">
+                      <div className="flex items-center gap-2 relative ml-auto sm:ml-0">
                         {/* Floating dark tooltip popover on Left Card */}
                         {isFirstCard && (
-                          <div className="absolute -top-9 right-0 z-20 pointer-events-none animate-in fade-in duration-200">
+                          <div className="absolute -top-9 right-0 z-20 pointer-events-none animate-in fade-in duration-200 hidden sm:block">
                             <div className="bg-slate-900 text-white text-[10px] font-semibold px-2.5 py-1 rounded-md shadow-lg border border-slate-750 flex items-center gap-1.5 whitespace-nowrap">
                               <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
                               <span>Safety-reassurance tooltip</span>
@@ -419,7 +419,7 @@ export const DonorDashboard: React.FC = () => {
                         {isFirstCard ? (
                           <button
                             onClick={() => handleCancelListing(listing.id)}
-                            className="px-3.5 py-1.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer uppercase tracking-wider"
+                            className="px-3.5 py-1.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer uppercase tracking-wider shrink-0"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>WITHDRAW</span>
@@ -427,7 +427,7 @@ export const DonorDashboard: React.FC = () => {
                         ) : (
                           <button
                             onClick={() => handleCancelListing(listing.id)}
-                            className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-rose-600 border border-slate-300 hover:border-rose-200 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                            className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-rose-600 border border-slate-300 hover:border-rose-200 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>Withdraw</span>

@@ -34,7 +34,7 @@ const MainView: React.FC = () => {
   }, [currentUser?.role]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-slate-50 flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-16 md:pb-0">
       {/* Platform Safety Disclaimer Banner */}
       <SafetyBanner onOpenGuidelines={() => setIsSafetyModalOpen(true)} />
 
@@ -46,7 +46,7 @@ const MainView: React.FC = () => {
       />
 
       {/* Workspace Viewport */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 overflow-hidden">
         {selectedView === 'DONOR' && <DonorDashboard />}
         {selectedView === 'RECIPIENT' && <RecipientDashboard />}
         {selectedView === 'ADMIN' && <AdminDashboard />}
