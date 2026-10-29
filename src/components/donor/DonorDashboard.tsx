@@ -33,6 +33,7 @@ export const DonorDashboard: React.FC = () => {
     setIsAuthModalOpen,
     listings,
     requests,
+    withdrawListing,
     updateListingStatus,
     updateRequestStatus,
     addToast
@@ -50,11 +51,11 @@ export const DonorDashboard: React.FC = () => {
 
   // Filter listings and requests for this donor
   const donorListings = currentUser
-    ? listings.filter((l) => l.donorId === currentUser.id)
+    ? listings.filter((l) => l.donorId === currentUser.id || (l as any).donor_id === currentUser.id)
     : [];
 
   const activeListings = donorListings.filter(
-    (l) => l.status === 'AVAILABLE' || l.status === 'REQUESTED' || l.status === 'CLAIMED' || l.status === 'FLAGGED'
+    (l) => l.status === 'LIVE' || l.status === 'AVAILABLE' || l.status === 'REQUESTED' || l.status === 'CLAIMED' || l.status === 'FLAGGED'
   );
 
   const donorRequests = currentUser
@@ -73,9 +74,9 @@ export const DonorDashboard: React.FC = () => {
 
   const handleCancelListing = async (listingId: string) => {
     try {
-      await updateListingStatus(listingId, 'CANCELLED');
+      await withdrawListing(listingId);
     } catch (err: any) {
-      addToast('Failed to cancel listing', err.message, 'error');
+      addToast('Failed to withdraw listing', err.message, 'error');
     }
   };
 

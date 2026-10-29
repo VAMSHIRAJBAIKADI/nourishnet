@@ -1,8 +1,9 @@
 export interface UserProfile {
   id: string;
   email: string;
-  role: 'DONOR' | 'RECIPIENT' | 'ADMIN';
+  role: 'DONOR' | 'RECIPIENT' | 'RECIPIENT_NGO' | 'ADMIN';
   name: string;
+  organizationName?: string;
   organizationDetails?: {
     type?: string;
     contactPerson?: string;
@@ -43,7 +44,7 @@ export interface ApiListing {
   pickupWindowEnd: string;
   pickupInstructions: string;
   imageUrl?: string;
-  status: 'AVAILABLE' | 'REQUESTED' | 'CLAIMED' | 'EXPIRED' | 'CANCELLED' | 'FLAGGED';
+  status: 'LIVE' | 'WITHDRAWN' | 'AVAILABLE' | 'REQUESTED' | 'CLAIMED' | 'EXPIRED' | 'CANCELLED' | 'FLAGGED';
   flagReason?: string;
   createdAt: string;
   updatedAt: string;
@@ -69,6 +70,20 @@ export interface ApiRequest {
   rejectionReason?: string;
   completedAt?: string;
   timestamp: string;
+}
+
+export interface ApiClaim {
+  id: string;
+  listing_id: string;
+  recipient_id: string;
+  status: 'PENDING' | 'APPROVED' | 'COMPLETED' | 'CANCELLED';
+  claimed_at: string;
+  timestamp?: string;
+  listingTitle?: string;
+  donorId?: string;
+  donorName?: string;
+  recipientName?: string;
+  notes?: string;
 }
 
 export interface ApiAuditLog {
@@ -115,6 +130,15 @@ async function handleResponse<T>(res: Response): Promise<T> {
 
 export const api = {
   auth: {
+    async signup(payload: { email: string; password: string; role: string; name: string; organizationName?: string; organizationDetails?: any }) {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return handleResponse<{ token: string; user: UserProfile }>(res);
+    },
+
     async register(payload: { email: string; password: string; role: string; name: string; organizationDetails?: any }) {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
@@ -142,12 +166,13 @@ export const api = {
   },
 
   listings: {
-    async getAll(params?: { category?: string; status?: string; search?: string; donorId?: string }) {
+    async getAll(params?: { category?: string; status?: string; search?: string; donorId?: string; role?: string }) {
       const query = new URLSearchParams();
       if (params?.category) query.append('category', params.category);
       if (params?.status) query.append('status', params.status);
       if (params?.search) query.append('search', params.search);
       if (params?.donorId) query.append('donorId', params.donorId);
+      if (params?.role) query.append('role', params.role);
 
       const res = await fetch(`/api/listings?${query.toString()}`, {
         headers: getAuthHeaders()
@@ -155,11 +180,19 @@ export const api = {
       return handleResponse<{ listings: ApiListing[] }>(res);
     },
 
-    async create(payload: Partial<ApiListing>) {
+    async create(payload: Partial<ApiListing> | any) {
       const res = await fetch('/api/listings', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify(payload)
+      });
+      return handleResponse<{ message: string; listing: ApiListing }>(res);
+    },
+
+    async withdraw(id: string) {
+      const res = await fetch(`/api/listings/${id}/withdraw`, {
+        method: 'POST',
+        headers: getAuthHeaders()
       });
       return handleResponse<{ message: string; listing: ApiListing }>(res);
     },
@@ -171,6 +204,24 @@ export const api = {
         body: JSON.stringify({ status, flagReason })
       });
       return handleResponse<{ message: string; listing: ApiListing }>(res);
+    }
+  },
+
+  claims: {
+    async getAll() {
+      const res = await fetch('/api/claims', {
+        headers: getAuthHeaders()
+      });
+      return handleResponse<{ claims: ApiClaim[] }>(res);
+    },
+
+    async create(payload: { listing_id: string; notes?: string; requestedMeals?: number; pickupVolunteer?: string }) {
+      const res = await fetch('/api/claims', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(payload)
+      });
+      return handleResponse<{ message: string; claim: ApiClaim; listing: ApiListing }>(res);
     }
   },
 

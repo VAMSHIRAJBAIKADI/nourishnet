@@ -4,17 +4,58 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { ListingRecord, ListingStatus, StorageType } from '../types';
 import { broadcastListingCreated, broadcastListingUpdated, broadcastListingDeleted, broadcastAuditLogged } from '../socket';
 
+// Helper to format listing with both snake_case and camelCase fields
+export function formatListing(l: ListingRecord): any {
+  const statusNormalized: ListingStatus = l.status === 'AVAILABLE' ? 'LIVE' : l.status;
+  const storageTemp = l.storage_temp || (
+    l.storageType === 'REFRIGERATED' ? 'Refrigerated' :
+    l.storageType === 'FROZEN' ? 'Frozen' :
+    l.storageType === 'AMBIENT' ? 'Ambient' : 'Refrigerated'
+  );
+
+  return {
+    ...l,
+    id: l.id,
+    donor_id: l.donor_id || l.donorId,
+    donorId: l.donorId || l.donor_id,
+    title: l.title,
+    category: (l.category || 'PREPARED').toUpperCase(),
+    storage_temp: storageTemp,
+    storageType: l.storageType || 'REFRIGERATED',
+    quantity_portions: l.quantity_portions || l.estimatedMeals || 10,
+    quantity: l.quantity || `${l.quantity_portions || 10} portions`,
+    estimatedMeals: l.estimatedMeals || l.quantity_portions || 10,
+    weight_kg: l.weight_kg !== undefined ? l.weight_kg : l.weightKg,
+    weightKg: l.weightKg !== undefined ? l.weightKg : (l.weight_kg || 5),
+    expiry_timestamp: l.expiry_timestamp || l.expiryTime,
+    expiryTime: l.expiryTime || l.expiry_timestamp,
+    status: statusNormalized,
+    created_at: l.created_at || l.createdAt,
+    createdAt: l.createdAt || l.created_at
+  };
+}
+
 export async function getListings(req: AuthenticatedRequest, res: Response) {
   try {
-    const { category, status, search, donorId } = req.query;
+    const { category, status, search, donorId, role } = req.query;
     let listings = await db.getListings();
 
     // Auto-expire listings whose expiryTime has passed
     const now = new Date();
     for (const l of listings) {
-      if (l.status === 'AVAILABLE' && new Date(l.expiryTime) < now) {
+      const expDate = new Date(l.expiry_timestamp || l.expiryTime);
+      if ((l.status === 'LIVE' || l.status === 'AVAILABLE') && expDate < now) {
         await db.updateListing(l.id, { status: 'EXPIRED' });
         l.status = 'EXPIRED';
+      }
+    }
+
+    // Role-based filtering:
+    // If requester is a Recipient NGO, prioritize live/available listings
+    const userRole = req.user?.role || (typeof role === 'string' ? role.toUpperCase() : undefined);
+    if (userRole === 'RECIPIENT' || userRole === 'RECIPIENT_NGO') {
+      if (!status) {
+        listings = listings.filter((l) => l.status === 'LIVE' || l.status === 'AVAILABLE');
       }
     }
 
@@ -23,11 +64,23 @@ export async function getListings(req: AuthenticatedRequest, res: Response) {
     }
 
     if (status && typeof status === 'string' && status !== 'all') {
-      listings = listings.filter((l) => l.status === status.toUpperCase());
+      const targetStatus = status.toUpperCase();
+      listings = listings.filter((l) => {
+        if (targetStatus === 'LIVE' || targetStatus === 'AVAILABLE') {
+          return l.status === 'LIVE' || l.status === 'AVAILABLE';
+        }
+        if (targetStatus === 'WITHDRAWN' || targetStatus === 'CANCELLED') {
+          return l.status === 'WITHDRAWN' || l.status === 'CANCELLED';
+        }
+        if (targetStatus === 'CLAIMED' || targetStatus === 'REQUESTED') {
+          return l.status === 'CLAIMED' || l.status === 'REQUESTED';
+        }
+        return l.status === targetStatus;
+      });
     }
 
     if (donorId && typeof donorId === 'string') {
-      listings = listings.filter((l) => l.donorId === donorId);
+      listings = listings.filter((l) => l.donorId === donorId || l.donor_id === donorId);
     }
 
     if (search && typeof search === 'string' && search.trim()) {
@@ -37,11 +90,12 @@ export async function getListings(req: AuthenticatedRequest, res: Response) {
           l.title.toLowerCase().includes(q) ||
           l.description.toLowerCase().includes(q) ||
           l.donorName.toLowerCase().includes(q) ||
-          l.allergens.some((a) => a.toLowerCase().includes(q))
+          (l.allergens && l.allergens.some((a) => a.toLowerCase().includes(q)))
       );
     }
 
-    res.json({ listings });
+    const formatted = listings.map(formatListing);
+    res.json({ listings: formatted });
   } catch (err: any) {
     console.error('getListings error:', err);
     res.status(500).json({ error: 'Failed to retrieve food listings.' });
@@ -55,7 +109,7 @@ export async function createListing(req: AuthenticatedRequest, res: Response) {
       return;
     }
 
-    const donor = await db.findUserById(req.user.userId);
+    const donor = await db.findUserById(req.user.userId || req.user.id || '');
     if (!donor) {
       res.status(404).json({ error: 'Donor user account not found.' });
       return;
@@ -66,12 +120,16 @@ export async function createListing(req: AuthenticatedRequest, res: Response) {
       description,
       category,
       quantity,
+      quantity_portions,
       estimatedMeals,
+      weight_kg,
       weightKg,
       prepareTime,
       expiryTime,
+      expiry_timestamp,
       locationAddress,
       neighborhood,
+      storage_temp,
       storageType,
       dietaryTags,
       allergens,
@@ -81,53 +139,64 @@ export async function createListing(req: AuthenticatedRequest, res: Response) {
       imageUrl
     } = req.body;
 
+    const finalExpiry = expiry_timestamp || expiryTime;
+
     // Strict Server-Side Validation: Expiry must be in the future
-    if (!expiryTime || new Date(expiryTime).getTime() <= Date.now()) {
+    if (!finalExpiry || new Date(finalExpiry).getTime() <= Date.now()) {
       res.status(400).json({
         error: 'Food Safety Validation Failed: Expiry time must be strictly set to a future timestamp.'
       });
       return;
     }
 
-    if (!title || !quantity || !category) {
-      res.status(400).json({ error: 'Title, quantity, and category are required.' });
+    if (!title) {
+      res.status(400).json({ error: 'Listing title is required.' });
       return;
     }
 
     const id = `list-${Date.now()}`;
     const nowIso = new Date().toISOString();
+    const expiryIso = new Date(finalExpiry).toISOString();
 
-    const isDonorVerified = donor.verifiedStatus === 'VERIFIED';
-    const initialStatus: ListingStatus = isDonorVerified ? 'AVAILABLE' : 'FLAGGED';
-    const flagReason = isDonorVerified
-      ? undefined
-      : 'Awaiting Admin Verification: Organization credentials currently under compliance review.';
+    const portions = Number(quantity_portions) || Number(estimatedMeals) || 10;
+    const finalWeight = Number(weight_kg !== undefined ? weight_kg : (weightKg !== undefined ? weightKg : 5));
+    const finalQuantity = quantity || `${portions} portions`;
+    const finalCategory = (category || 'PREPARED').toUpperCase();
+    const finalStorageTemp = storage_temp || 'Refrigerated';
+
+    const isDonorVerified = donor.verifiedStatus === 'VERIFIED' || donor.verified_status === 'VERIFIED';
+    const initialStatus: ListingStatus = 'LIVE';
 
     const newListing: ListingRecord = {
       id,
+      donor_id: donor.id,
       donorId: donor.id,
-      donorName: donor.organizationDetails?.type || donor.name,
+      donorName: donor.organizationDetails?.type || donor.organizationName || donor.name,
       donorVerified: isDonorVerified,
       title: title.trim(),
       description: (description || '').trim(),
-      category: category.toLowerCase().trim(),
-      quantity: quantity.trim(),
-      estimatedMeals: Number(estimatedMeals) || 10,
-      weightKg: Number(weightKg) || 5,
+      category: finalCategory,
+      storage_temp: finalStorageTemp,
+      storageType: (storageType || 'REFRIGERATED') as StorageType,
+      quantity: finalQuantity,
+      quantity_portions: portions,
+      estimatedMeals: portions,
+      weight_kg: finalWeight,
+      weightKg: finalWeight,
       prepareTime: prepareTime || nowIso,
-      expiryTime: new Date(expiryTime).toISOString(),
+      expiry_timestamp: expiryIso,
+      expiryTime: expiryIso,
       locationAddress: locationAddress || donor.organizationDetails?.address || 'Metro Area',
       neighborhood: neighborhood || donor.organizationDetails?.neighborhood || 'Downtown',
-      storageType: (storageType || 'REFRIGERATED') as StorageType,
       dietaryTags: Array.isArray(dietaryTags) ? dietaryTags : [],
       allergens: Array.isArray(allergens) ? allergens : [],
       pickupWindowStart: pickupWindowStart || nowIso,
       pickupWindowEnd: pickupWindowEnd || new Date(Date.now() + 4 * 3600000).toISOString(),
       pickupInstructions: pickupInstructions || 'Check with kitchen receiving dock.',
-      imageUrl,
+      imageUrl: imageUrl || '/src/assets/images/hero_surplus_food_1793181935977.jpg',
       status: initialStatus,
-      flagReason,
       createdAt: nowIso,
+      created_at: nowIso,
       updatedAt: nowIso
     };
 
@@ -137,14 +206,49 @@ export async function createListing(req: AuthenticatedRequest, res: Response) {
     broadcastListingCreated(newListing);
 
     res.status(201).json({
-      message: isDonorVerified
-        ? 'Listing successfully published and broadcast to relief networks.'
-        : 'Listing created and queued for Admin safety compliance verification.',
-      listing: newListing
+      message: 'Listing successfully published and broadcast to relief networks.',
+      listing: formatListing(newListing)
     });
   } catch (err: any) {
     console.error('createListing error:', err);
     res.status(500).json({ error: 'Internal server error creating listing.' });
+  }
+}
+
+export async function withdrawListing(req: AuthenticatedRequest, res: Response) {
+  try {
+    const { id } = req.params;
+
+    const listing = await db.findListingById(id);
+    if (!listing) {
+      res.status(404).json({ error: 'Target listing not found.' });
+      return;
+    }
+
+    const currentUserId = req.user?.userId || req.user?.id;
+    const isOwner = listing.donorId === currentUserId || listing.donor_id === currentUserId;
+    const isAdmin = req.user?.role === 'ADMIN';
+
+    if (!isOwner && !isAdmin) {
+      res.status(403).json({ error: 'Forbidden: Only the posting donor or an administrator can withdraw this listing.' });
+      return;
+    }
+
+    const updated = await db.updateListing(id, {
+      status: 'WITHDRAWN'
+    });
+
+    if (updated) {
+      broadcastListingUpdated(updated);
+    }
+
+    res.json({
+      message: 'Listing successfully withdrawn from surplus dispatch.',
+      listing: updated ? formatListing(updated) : undefined
+    });
+  } catch (err: any) {
+    console.error('withdrawListing error:', err);
+    res.status(500).json({ error: 'Failed to withdraw listing.' });
   }
 }
 
@@ -159,7 +263,8 @@ export async function updateListingStatus(req: AuthenticatedRequest, res: Respon
       return;
     }
 
-    if (req.user?.role !== 'ADMIN' && req.user?.userId !== listing.donorId) {
+    const currentUserId = req.user?.userId || req.user?.id;
+    if (req.user?.role !== 'ADMIN' && currentUserId !== listing.donorId && currentUserId !== listing.donor_id) {
       res.status(403).json({ error: 'Forbidden: You do not have permission to modify this listing.' });
       return;
     }
@@ -173,7 +278,7 @@ export async function updateListingStatus(req: AuthenticatedRequest, res: Respon
       broadcastListingUpdated(updated);
     }
 
-    res.json({ message: 'Listing status updated.', listing: updated });
+    res.json({ message: 'Listing status updated.', listing: updated ? formatListing(updated) : undefined });
   } catch (err: any) {
     console.error('updateListingStatus error:', err);
     res.status(500).json({ error: 'Failed to update listing status.' });
@@ -196,7 +301,7 @@ export async function adminDeleteListing(req: AuthenticatedRequest, res: Respons
 
     const auditLog = await db.createAuditLog({
       id: `log-${Date.now()}`,
-      adminId: admin.userId,
+      adminId: admin.userId || admin.id || 'admin',
       adminName: admin.name,
       action: 'LISTING_MODERATED',
       targetType: 'LISTING',

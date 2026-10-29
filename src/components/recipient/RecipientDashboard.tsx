@@ -47,13 +47,13 @@ export const RecipientDashboard: React.FC = () => {
   const [selectedListingForRequest, setSelectedListingForRequest] = useState<ApiListing | null>(null);
   const [selectedRequestForPickup, setSelectedRequestForPickup] = useState<ApiRequest | null>(null);
 
-  const isRecipient = currentUser?.role === 'RECIPIENT';
+  const isRecipient = currentUser?.role === 'RECIPIENT' || currentUser?.role === 'RECIPIENT_NGO';
 
   // Filter listings
   const filteredListings = useMemo(() => {
     return listings.filter((l) => {
-      // Must not be flagged by admin or cancelled
-      if (l.status === 'FLAGGED' || l.status === 'CANCELLED' || l.status === 'EXPIRED') return false;
+      // Must not be flagged by admin, cancelled, or withdrawn
+      if (l.status === 'FLAGGED' || l.status === 'CANCELLED' || l.status === 'WITHDRAWN' || l.status === 'EXPIRED') return false;
 
       // Search match
       if (searchQuery.trim()) {

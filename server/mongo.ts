@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { UserModel, ListingModel, RequestModel, AuditLogModel } from './models/index';
-import { UserRecord, ListingRecord, RequestRecord, AuditLogRecord } from './types';
+import { UserModel, ListingModel, RequestModel, AuditLogModel, ClaimModel } from './models/index';
+import { UserRecord, ListingRecord, RequestRecord, AuditLogRecord, ClaimRecord } from './types';
 
 let isConnected = false;
 
@@ -325,6 +325,46 @@ export const mongoDb = {
     };
   },
 
+  // Claims
+  async getClaims(): Promise<ClaimRecord[]> {
+    const docs = await ClaimModel.find().sort({ claimed_at: -1 }).lean();
+    return docs.map((d: any) => ({
+      ...d,
+      claimed_at: new Date(d.claimed_at).toISOString(),
+      timestamp: d.timestamp ? new Date(d.timestamp).toISOString() : new Date(d.claimed_at).toISOString()
+    }));
+  },
+
+  async findClaimById(id: string): Promise<ClaimRecord | null> {
+    const d: any = await ClaimModel.findOne({ id }).lean();
+    if (!d) return null;
+    return {
+      ...d,
+      claimed_at: new Date(d.claimed_at).toISOString(),
+      timestamp: d.timestamp ? new Date(d.timestamp).toISOString() : new Date(d.claimed_at).toISOString()
+    };
+  },
+
+  async createClaim(claim: ClaimRecord): Promise<ClaimRecord> {
+    const doc = new ClaimModel({
+      ...claim,
+      claimed_at: new Date(claim.claimed_at || Date.now())
+    });
+    await doc.save();
+    return claim;
+  },
+
+  async updateClaim(id: string, updates: Partial<ClaimRecord>): Promise<ClaimRecord | null> {
+    const mongoUpdates: any = { ...updates };
+    if (updates.claimed_at) mongoUpdates.claimed_at = new Date(updates.claimed_at);
+    const updated: any = await ClaimModel.findOneAndUpdate({ id }, { $set: mongoUpdates }, { new: true }).lean();
+    if (!updated) return null;
+    return {
+      ...updated,
+      claimed_at: new Date(updated.claimed_at).toISOString()
+    };
+  },
+
   // Audit Logs
   async getAuditLogs(): Promise<AuditLogRecord[]> {
     const docs = await AuditLogModel.find().sort({ timestamp: -1 }).lean();
@@ -343,3 +383,4 @@ export const mongoDb = {
     return log;
   }
 };
+

@@ -1,30 +1,39 @@
-export type UserRole = 'DONOR' | 'RECIPIENT' | 'ADMIN';
+export type UserRole = 'DONOR' | 'RECIPIENT' | 'RECIPIENT_NGO' | 'ADMIN';
 
 export type VerifiedStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 
 export type ListingStatus = 
+  | 'LIVE'
+  | 'CLAIMED'
+  | 'WITHDRAWN'
   | 'AVAILABLE' 
   | 'REQUESTED' 
-  | 'CLAIMED' 
   | 'EXPIRED' 
-  | 'CANCELLED'
+  | 'CANCELLED' 
   | 'FLAGGED';
 
 export type RequestStatus = 
   | 'PENDING' 
   | 'ACCEPTED' 
+  | 'APPROVED'
   | 'REJECTED' 
   | 'CANCELLED' 
   | 'COMPLETED';
+
+export type ClaimStatus = 'PENDING' | 'APPROVED' | 'COMPLETED' | 'CANCELLED';
 
 export type StorageType = 
   | 'REFRIGERATED' 
   | 'FROZEN' 
   | 'AMBIENT' 
-  | 'HOT_HOLD';
+  | 'HOT_HOLD'
+  | 'Refrigerated'
+  | 'Frozen'
+  | 'Ambient';
 
 export interface OrganizationDetails {
   type?: string;
+  name?: string;
   contactPerson?: string;
   phone?: string;
   address?: string;
@@ -40,31 +49,40 @@ export interface OrganizationDetails {
 
 export interface UserRecord {
   id: string;
+  name: string;
   email: string;
   passwordHash: string;
+  password_hash?: string;
   role: UserRole;
-  name: string;
+  organizationName?: string;
   organizationDetails: OrganizationDetails;
   verifiedStatus: VerifiedStatus;
+  verified_status?: VerifiedStatus;
   createdAt: string;
+  created_at?: string;
 }
 
 export interface ListingRecord {
   id: string;
   donorId: string;
+  donor_id?: string;
   donorName: string;
   donorVerified: boolean;
   title: string;
   description: string;
-  category: string;
+  category: string; // PREPARED, BAKERY, PRODUCE, etc.
   quantity: string;
+  quantity_portions?: number;
   estimatedMeals: number;
   weightKg: number;
+  weight_kg?: number;
+  storageType: StorageType;
+  storage_temp?: string; // Refrigerated, Ambient, Frozen
   prepareTime: string;
   expiryTime: string;
+  expiry_timestamp?: string;
   locationAddress: string;
   neighborhood: string;
-  storageType: StorageType;
   dietaryTags: string[];
   allergens: string[];
   pickupWindowStart: string;
@@ -74,7 +92,24 @@ export interface ListingRecord {
   status: ListingStatus;
   flagReason?: string;
   createdAt: string;
+  created_at?: string;
   updatedAt: string;
+}
+
+export interface ClaimRecord {
+  id: string;
+  listing_id: string;
+  listingId?: string;
+  recipient_id: string;
+  recipientId?: string;
+  status: ClaimStatus;
+  claimed_at: string;
+  timestamp?: string;
+  listingTitle?: string;
+  donorId?: string;
+  donorName?: string;
+  recipientName?: string;
+  notes?: string;
 }
 
 export interface RequestRecord {
@@ -104,7 +139,7 @@ export interface AuditLogRecord {
   adminId: string;
   adminName: string;
   action: string;
-  targetType: 'LISTING' | 'USER' | 'REQUEST';
+  targetType: 'LISTING' | 'USER' | 'REQUEST' | 'CLAIM';
   targetId: string;
   details: string;
   timestamp: string;
@@ -112,7 +147,9 @@ export interface AuditLogRecord {
 
 export interface AuthJWTPayload {
   userId: string;
+  id?: string;
   email: string;
   role: UserRole;
   name: string;
+  organizationName?: string;
 }

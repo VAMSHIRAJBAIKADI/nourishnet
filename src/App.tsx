@@ -23,7 +23,13 @@ const MainView: React.FC = () => {
   // Sync selected view with logged-in user role
   useEffect(() => {
     if (currentUser?.role) {
-      setSelectedView(currentUser.role);
+      if (currentUser.role === 'RECIPIENT_NGO' || currentUser.role === 'RECIPIENT') {
+        setSelectedView('RECIPIENT');
+      } else if (currentUser.role === 'ADMIN') {
+        setSelectedView('ADMIN');
+      } else {
+        setSelectedView('DONOR');
+      }
     }
   }, [currentUser?.role]);
 

@@ -19,6 +19,7 @@ interface AppContextType {
   toasts: ToastMessage[];
 
   login: (email: string, password: string) => Promise<void>;
+  signup: (payload: { email: string; password: string; role: string; name: string; organizationName?: string; organizationDetails?: any }) => Promise<void>;
   register: (payload: { email: string; password: string; role: string; name: string; organizationDetails?: any }) => Promise<void>;
   logout: () => void;
 
@@ -26,8 +27,10 @@ interface AppContextType {
   refreshRequests: () => Promise<void>;
   refreshAdminData: () => Promise<void>;
 
-  createListing: (data: Partial<ApiListing>) => Promise<ApiListing>;
+  createListing: (data: Partial<ApiListing> | any) => Promise<ApiListing>;
+  withdrawListing: (id: string) => Promise<void>;
   updateListingStatus: (id: string, status: string, flagReason?: string) => Promise<void>;
+  createClaim: (data: { listing_id: string; notes?: string; requestedMeals?: number; pickupVolunteer?: string }) => Promise<void>;
   createRequest: (data: {
     listingId: string;
     requestedMeals: number;
@@ -252,6 +255,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addToast('Authentication Successful', `Welcome back, ${res.user.name}!`, 'success');
   };
 
+  const signup = async (payload: { email: string; password: string; role: string; name: string; organizationName?: string; organizationDetails?: any }) => {
+    const res = await api.auth.signup(payload);
+    localStorage.setItem('nourishnet_jwt_token', res.token);
+    setToken(res.token);
+    setCurrentUser(res.user);
+    addToast('Account Registered', `Welcome to NourishNet, ${res.user.name}!`, 'success');
+  };
+
   const register = async (payload: { email: string; password: string; role: string; name: string; organizationDetails?: any }) => {
     const res = await api.auth.register(payload);
     localStorage.setItem('nourishnet_jwt_token', res.token);
@@ -268,15 +279,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // Listings actions
-  const createListing = async (data: Partial<ApiListing>) => {
+  const createListing = async (data: Partial<ApiListing> | any) => {
     const res = await api.listings.create(data);
     addToast('Listing Published', res.message, 'success');
     return res.listing;
   };
 
+  const withdrawListing = async (id: string) => {
+    await api.listings.withdraw(id);
+    addToast('Listing Withdrawn', 'Listing has been withdrawn from surplus dispatch.', 'info');
+  };
+
   const updateListingStatus = async (id: string, status: string, flagReason?: string) => {
     await api.listings.updateStatus(id, status, flagReason);
     addToast('Status Updated', `Listing marked as ${status}.`, 'info');
+  };
+
+  const createClaim = async (data: { listing_id: string; notes?: string; requestedMeals?: number; pickupVolunteer?: string }) => {
+    await api.claims.create(data);
+    addToast('Claim Placed Successfully', 'Your pickup claim has been dispatched to the donor in real-time.', 'success');
   };
 
   // Requests actions
@@ -310,7 +331,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     refreshAdminData();
   };
 
-  const activeRole = currentUser?.role || 'DONOR';
+  const activeRole: 'DONOR' | 'RECIPIENT' | 'ADMIN' =
+    currentUser?.role === 'RECIPIENT_NGO' ? 'RECIPIENT' : (currentUser?.role || 'DONOR');
 
   return (
     <AppContext.Provider
@@ -328,13 +350,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         adminMetrics,
         toasts,
         login,
+        signup,
         register,
         logout,
         refreshListings,
         refreshRequests,
         refreshAdminData,
         createListing,
+        withdrawListing,
         updateListingStatus,
+        createClaim,
         createRequest,
         updateRequestStatus,
         adminDeleteListing,

@@ -8,13 +8,19 @@ import { createServer as createViteServer } from 'vite';
 
 const execAsync = promisify(exec);
 import { initSocketIO } from './server/socket';
-import { register, login, getMe } from './server/controllers/authController';
+import { signup, register, login, getMe } from './server/controllers/authController';
 import {
   getListings,
   createListing,
+  withdrawListing,
   updateListingStatus,
   adminDeleteListing
 } from './server/controllers/listingController';
+import {
+  createClaim,
+  getClaims,
+  updateClaimStatus
+} from './server/controllers/claimController';
 import {
   getRequests,
   createRequest,
@@ -49,7 +55,8 @@ async function startServer() {
   // REST API Routes
   const apiRouter = express.Router();
 
-  // Auth Routes
+  // Auth Routes (Supporting both /auth/signup and /auth/register)
+  apiRouter.post('/auth/signup', signup);
   apiRouter.post('/auth/register', register);
   apiRouter.post('/auth/login', login);
   apiRouter.get('/auth/me', authenticateToken, getMe);
@@ -57,7 +64,13 @@ async function startServer() {
   // Listings Routes
   apiRouter.get('/listings', getListings);
   apiRouter.post('/listings', authenticateToken, requireDonor, createListing);
+  apiRouter.post('/listings/:id/withdraw', authenticateToken, requireDonor, withdrawListing);
   apiRouter.patch('/listings/:id/status', authenticateToken, updateListingStatus);
+
+  // Claims Routes (Recipient only for creating claims)
+  apiRouter.post('/claims', authenticateToken, requireRecipient, createClaim);
+  apiRouter.get('/claims', authenticateToken, getClaims);
+  apiRouter.patch('/claims/:id', authenticateToken, updateClaimStatus);
 
   // Requests Routes
   apiRouter.get('/requests', authenticateToken, getRequests);

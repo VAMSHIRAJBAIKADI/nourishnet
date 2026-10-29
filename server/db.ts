@@ -4,7 +4,8 @@ import {
   UserRecord,
   ListingRecord,
   RequestRecord,
-  AuditLogRecord
+  AuditLogRecord,
+  ClaimRecord
 } from './types';
 import { SEED_DATA } from './seedData';
 import { isMongoActive, mongoDb } from './mongo';
@@ -16,6 +17,7 @@ interface DatabaseStore {
   users: UserRecord[];
   listings: ListingRecord[];
   requests: RequestRecord[];
+  claims: ClaimRecord[];
   auditLogs: AuditLogRecord[];
 }
 
@@ -33,13 +35,16 @@ class Database {
       }
       if (fs.existsSync(DB_FILE)) {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (!parsed.claims) parsed.claims = [];
+        return parsed;
       }
     } catch (err) {
       console.warn('Failed to read DB_FILE, falling back to seed data:', err);
     }
-    this.saveData(SEED_DATA);
-    return SEED_DATA;
+    const seedWithClaims = { ...SEED_DATA, claims: (SEED_DATA as any).claims || [] };
+    this.saveData(seedWithClaims);
+    return seedWithClaims;
   }
 
   private saveData(data: DatabaseStore) {
@@ -238,6 +243,60 @@ class Database {
     Object.assign(req, updates);
     this.commit();
     return req;
+  }
+
+  // Claims
+  async getClaims(): Promise<ClaimRecord[]> {
+    if (isMongoActive()) {
+      try {
+        return await mongoDb.getClaims();
+      } catch (err) {
+        console.warn('MongoDB error, using fallback store:', err);
+      }
+    }
+    return this.data.claims || [];
+  }
+
+  async findClaimById(id: string): Promise<ClaimRecord | undefined> {
+    if (isMongoActive()) {
+      try {
+        const claim = await mongoDb.findClaimById(id);
+        if (claim) return claim;
+      } catch (err) {
+        console.warn('MongoDB error, using fallback store:', err);
+      }
+    }
+    return (this.data.claims || []).find((c) => c.id === id);
+  }
+
+  async createClaim(claim: ClaimRecord): Promise<ClaimRecord> {
+    if (isMongoActive()) {
+      try {
+        await mongoDb.createClaim(claim);
+      } catch (err) {
+        console.error('MongoDB error creating claim:', err);
+      }
+    }
+    if (!this.data.claims) this.data.claims = [];
+    this.data.claims.unshift(claim);
+    this.commit();
+    return claim;
+  }
+
+  async updateClaim(id: string, updates: Partial<ClaimRecord>): Promise<ClaimRecord | undefined> {
+    if (isMongoActive()) {
+      try {
+        await mongoDb.updateClaim(id, updates);
+      } catch (err) {
+        console.error('MongoDB error updating claim:', err);
+      }
+    }
+    if (!this.data.claims) this.data.claims = [];
+    const claim = this.data.claims.find((c) => c.id === id);
+    if (!claim) return undefined;
+    Object.assign(claim, updates);
+    this.commit();
+    return claim;
   }
 
   // Audit Logs

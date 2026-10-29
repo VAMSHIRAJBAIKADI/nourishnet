@@ -124,22 +124,27 @@ export const CreateListingModal: React.FC<CreateListingModalProps> = ({ isOpen, 
 
     setSubmitting(true);
     try {
+      const expIso = new Date(expiryTime).toISOString();
       await createListing({
         title: title.trim(),
         description: description.trim(),
-        category,
+        category: category.toUpperCase(),
         quantity: quantity.trim(),
+        quantity_portions: Number(estimatedMeals) || 10,
         estimatedMeals: Number(estimatedMeals) || 10,
+        weight_kg: Number(weightKg) || 5,
         weightKg: Number(weightKg) || 5,
-        dietaryTags,
+        storage_temp: storageCondition === 'refrigerated' ? 'Refrigerated' : storageCondition === 'frozen' ? 'Frozen' : 'Ambient',
         storageType: storageCondition.toUpperCase() as any,
         prepareTime: new Date(prepTime).toISOString(),
-        expiryTime: new Date(expiryTime).toISOString(),
+        expiry_timestamp: expIso,
+        expiryTime: expIso,
         locationAddress: pickupAddress.trim(),
         neighborhood: currentUser?.organizationDetails?.neighborhood || 'Downtown',
         pickupWindowStart: new Date(pickupWindowStart).toISOString(),
         pickupWindowEnd: new Date(pickupWindowEnd).toISOString(),
         pickupInstructions: pickupInstructions.trim(),
+        dietaryTags,
         allergens: allergensList.length > 0 ? allergensList : ['No common allergens declared']
       });
       onClose();

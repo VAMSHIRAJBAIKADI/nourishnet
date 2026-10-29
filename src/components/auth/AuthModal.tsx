@@ -13,13 +13,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   defaultTab = 'login'
 }) => {
-  const { login, register, addToast } = useApp();
+  const { login, signup, register, addToast } = useApp();
 
   const [tab, setTab] = useState<'login' | 'register'>(defaultTab);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [role, setRole] = useState<'DONOR' | 'RECIPIENT' | 'ADMIN'>('DONOR');
+  const [role, setRole] = useState<'DONOR' | 'RECIPIENT_NGO' | 'ADMIN'>('DONOR');
   const [orgName, setOrgName] = useState('');
   const [orgPhone, setOrgPhone] = useState('');
   const [orgAddress, setOrgAddress] = useState('');
@@ -32,10 +32,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setLoading(true);
     setErrorMsg('');
     try {
-      await login(emailCred, 'password123');
+      await login(emailCred, 'Password123!');
       onClose();
     } catch (err: any) {
-      setErrorMsg(err.message || 'Authentication failed');
+      // Fallback try lowercase password123
+      try {
+        await login(emailCred, 'password123');
+        onClose();
+      } catch (err2: any) {
+        setErrorMsg(err2.message || 'Authentication failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -51,11 +57,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         await login(email, password);
         onClose();
       } else {
-        await register({
+        await signup({
           email,
           password,
           name,
           role,
+          organizationName: orgName || name,
           organizationDetails: {
             type: orgName || name,
             contactPerson: name,
@@ -107,7 +114,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <button
               type="button"
-              onClick={() => handleQuickLogin('chef@grandhotel.com')}
+              onClick={() => handleQuickLogin('donor@nourishnet.org')}
               disabled={loading}
               className="p-2.5 bg-white border border-slate-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/40 text-left transition-colors flex flex-col justify-between cursor-pointer"
             >
@@ -116,13 +123,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Donor</span>
               </div>
               <div className="text-[10px] text-slate-500 truncate mt-1">
-                Grand Hotel Banquets
+                donor@nourishnet.org
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => handleQuickLogin('sarah@hopekitchen.org')}
+              onClick={() => handleQuickLogin('recipient@nourishnet.org')}
               disabled={loading}
               className="p-2.5 bg-white border border-slate-200 rounded-xl hover:border-emerald-500 hover:bg-emerald-50/40 text-left transition-colors flex flex-col justify-between cursor-pointer"
             >
@@ -131,7 +138,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Recipient NGO</span>
               </div>
               <div className="text-[10px] text-slate-500 truncate mt-1">
-                Hope Community Kitchen
+                recipient@nourishnet.org
               </div>
             </button>
 
@@ -146,7 +153,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Admin</span>
               </div>
               <div className="text-[10px] text-slate-500 truncate mt-1">
-                Compliance Officer
+                admin@nourishnet.org
               </div>
             </button>
           </div>
@@ -202,7 +209,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       className="w-full px-3 py-2 border border-slate-200 rounded-lg text-slate-800"
                     >
                       <option value="DONOR">Food Donor (Hotel / Restaurant / Grocery)</option>
-                      <option value="RECIPIENT">Recipient (Shelter / Food Bank / NGO)</option>
+                      <option value="RECIPIENT_NGO">Recipient NGO (Shelter / Food Bank / Relief)</option>
                       <option value="ADMIN">Platform Administrator</option>
                     </select>
                   </div>

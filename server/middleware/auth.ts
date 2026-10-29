@@ -19,6 +19,10 @@ export function authenticateToken(req: AuthenticatedRequest, res: Response, next
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as AuthJWTPayload;
+    // Normalize payload id/userId
+    if (!decoded.userId && decoded.id) {
+      decoded.userId = decoded.id;
+    }
     req.user = decoded;
     next();
   } catch (err) {
@@ -34,9 +38,18 @@ export function requireRole(allowedRoles: UserRole[]) {
       return;
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    // Treat RECIPIENT and RECIPIENT_NGO as equivalent roles
+    const userRole = req.user.role;
+    const isAllowed = allowedRoles.some((role) => {
+      if (role === 'RECIPIENT' || role === 'RECIPIENT_NGO') {
+        return userRole === 'RECIPIENT' || userRole === 'RECIPIENT_NGO';
+      }
+      return role === userRole;
+    });
+
+    if (!isAllowed) {
       res.status(403).json({
-        error: `Forbidden: Access restricted to [${allowedRoles.join(', ')}] roles. Your role is ${req.user.role}.`
+        error: `Forbidden: Access restricted to [${allowedRoles.join(', ')}] roles. Your current role is ${userRole}.`
       });
       return;
     }
@@ -46,5 +59,5 @@ export function requireRole(allowedRoles: UserRole[]) {
 }
 
 export const requireDonor = requireRole(['DONOR']);
-export const requireRecipient = requireRole(['RECIPIENT']);
+export const requireRecipient = requireRole(['RECIPIENT', 'RECIPIENT_NGO']);
 export const requireAdmin = requireRole(['ADMIN']);
