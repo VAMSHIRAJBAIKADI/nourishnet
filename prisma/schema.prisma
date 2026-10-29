@@ -1,0 +1,140 @@
+// Prisma Schema for NourishNet Food Donation Platform
+// Problem ID: HACK-P197
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  DONOR
+  RECIPIENT
+  ADMIN
+}
+
+enum VerifiedStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum ListingStatus {
+  AVAILABLE
+  REQUESTED
+  CLAIMED
+  EXPIRED
+  CANCELLED
+  FLAGGED
+}
+
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+  COMPLETED
+}
+
+enum StorageType {
+  REFRIGERATED
+  FROZEN
+  AMBIENT
+  HOT_HOLD
+}
+
+model User {
+  id                  String         @id @default(uuid())
+  email               String         @unique
+  passwordHash        String
+  role                Role
+  name                String
+  organizationDetails Json?          // e.g. address, phone, licenseNumber, foodSafetyCert, taxExemptId, dailyMeals
+  verifiedStatus      VerifiedStatus @default(PENDING)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  // Relations
+  listings            Listing[]      @relation("DonorListings")
+  requests            Request[]      @relation("RecipientRequests")
+  auditLogs           AuditLog[]     @relation("AdminAuditLogs")
+
+  @@index([email])
+  @@index([role])
+}
+
+model Listing {
+  id                 String         @id @default(uuid())
+  donorId            String
+  donor              User           @relation("DonorListings", fields: [donorId], references: [id], onDelete: Cascade)
+  title              String
+  description        String
+  category           String         // prepared, produce, bakery, dairy, packaged, beverages
+  quantity           String         // e.g. "45 portions / 15 pans"
+  estimatedMeals     Int            @default(1)
+  weightKg           Float          @default(1.0)
+  prepareTime        DateTime
+  expiryTime         DateTime
+  locationAddress    String
+  neighborhood       String?
+  storageType        StorageType    @default(REFRIGERATED)
+  dietaryTags        String[]       @default([])
+  allergens          String[]       @default([])
+  pickupWindowStart  DateTime
+  pickupWindowEnd    DateTime
+  pickupInstructions String?
+  imageUrl           String?
+  status             ListingStatus  @default(AVAILABLE)
+  flagReason         String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  // Relations
+  requests           Request[]      @relation("ListingRequests")
+
+  @@index([donorId])
+  @@index([status])
+  @@index([category])
+  @@index([expiryTime])
+}
+
+model Request {
+  id                 String        @id @default(uuid())
+  listingId          String
+  listing            Listing       @relation("ListingRequests", fields: [listingId], references: [id], onDelete: Cascade)
+  recipientId        String
+  recipient          User          @relation("RecipientRequests", fields: [recipientId], references: [id], onDelete: Cascade)
+  requestedMeals     Int
+  pickupVolunteer    String
+  volunteerPhone     String
+  vehicleType        String
+  pickupTime         DateTime
+  notes              String?
+  status             RequestStatus @default(PENDING)
+  pickupCode         String
+  rejectionReason    String?
+  completedAt        DateTime?
+  timestamp          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([listingId])
+  @@index([recipientId])
+  @@index([status])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
+  action     String   // e.g. "LISTING_MODERATED", "ORGANIZATION_VERIFIED"
+  targetType String   // "LISTING", "USER", "REQUEST"
+  targetId   String
+  details    String
+  timestamp  DateTime @default(now())
+
+  @@index([adminId])
+  @@index([targetType, targetId])
+}

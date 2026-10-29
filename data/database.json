@@ -1,0 +1,330 @@
+{
+  "users": [
+    {
+      "id": "user-donor-1",
+      "email": "chef@grandhotel.com",
+      "passwordHash": "$2b$10$/5c4PWR.A6He3p12HjciYuOCLehGTeGOIOlC65Yaz2z4I6xodLgJy",
+      "role": "DONOR",
+      "name": "Chef Marcus Vance",
+      "organizationDetails": {
+        "type": "Grand Hotel Restaurant & Banquets",
+        "contactPerson": "Chef Marcus Vance",
+        "phone": "(555) 234-8901",
+        "address": "450 Grand Avenue, Downtown Metro",
+        "neighborhood": "Downtown",
+        "licenseNumber": "FD-LIC-2024-8841",
+        "foodSafetyCert": "ServSafe Manager #SS-99214",
+        "description": "Premier downtown hotel producing freshly catered meals and executive banquet platters."
+      },
+      "verifiedStatus": "VERIFIED",
+      "createdAt": "2026-10-24T07:17:34.144Z"
+    },
+    {
+      "id": "user-donor-2",
+      "email": "surplus@greenvalleymart.org",
+      "passwordHash": "$2b$10$/5c4PWR.A6He3p12HjciYuOCLehGTeGOIOlC65Yaz2z4I6xodLgJy",
+      "role": "DONOR",
+      "name": "Elena Rostova",
+      "organizationDetails": {
+        "type": "GreenValley Organic Mart",
+        "contactPerson": "Elena Rostova",
+        "phone": "(555) 489-3120",
+        "address": "1120 Harvest Boulevard, Midtown East",
+        "neighborhood": "Midtown",
+        "licenseNumber": "GRC-STATE-55102",
+        "foodSafetyCert": "HACCP Retail Certified #HC-4401",
+        "description": "Regional grocery market donating surplus farm-direct organic produce and dairy."
+      },
+      "verifiedStatus": "VERIFIED",
+      "createdAt": "2026-10-25T13:17:34.144Z"
+    },
+    {
+      "id": "user-donor-unverified",
+      "email": "bistro@crestview.com",
+      "passwordHash": "$2b$10$/5c4PWR.A6He3p12HjciYuOCLehGTeGOIOlC65Yaz2z4I6xodLgJy",
+      "role": "DONOR",
+      "name": "Julian Hayes",
+      "organizationDetails": {
+        "type": "Crestview Bistro & Tavern",
+        "contactPerson": "Julian Hayes",
+        "phone": "(555) 789-0123",
+        "address": "109 Harbor View, Eastside",
+        "neighborhood": "Eastside",
+        "licenseNumber": "FD-PEND-2026-09",
+        "foodSafetyCert": "Pending Health Inspection Review",
+        "description": "Casual neighborhood bistro with evening surplus."
+      },
+      "verifiedStatus": "PENDING",
+      "createdAt": "2026-10-28T19:17:34.144Z"
+    },
+    {
+      "id": "user-recipient-1",
+      "email": "sarah@hopekitchen.org",
+      "passwordHash": "$2b$10$/5c4PWR.A6He3p12HjciYuOCLehGTeGOIOlC65Yaz2z4I6xodLgJy",
+      "role": "RECIPIENT",
+      "name": "Sarah Jenkins",
+      "organizationDetails": {
+        "type": "Hope Community Kitchen",
+        "contactPerson": "Sarah Jenkins",
+        "phone": "(555) 678-4321",
+        "address": "210 Pine Street, Downtown",
+        "neighborhood": "Downtown",
+        "taxExemptId": "501(c)(3) EIN: 84-2910394",
+        "dailyMeals": 280,
+        "coldStorageCapacity": "Large Commercial Walk-in Cooler (350 cu ft) + 2 Freezers",
+        "transportTypes": [
+          "Refrigerated Cargo Van (Ford Transit)",
+          "Volunteer SUV with Thermal Coolers"
+        ],
+        "description": "Serving hot, nutritious lunch and dinner 7 days a week to community members."
+      },
+      "verifiedStatus": "VERIFIED",
+      "createdAt": "2026-10-23T01:17:34.144Z"
+    },
+    {
+      "id": "user-recipient-2",
+      "email": "torres@stjudeshelter.org",
+      "passwordHash": "$2b$10$/5c4PWR.A6He3p12HjciYuOCLehGTeGOIOlC65Yaz2z4I6xodLgJy",
+      "role": "RECIPIENT",
+      "name": "Michael Torres",
+      "organizationDetails": {
+        "type": "St. Jude's Family Shelter",
+        "contactPerson": "Michael Torres",
+        "phone": "(555) 912-3045",
+        "address": "640 Oakway Terrace, Westside District",
+        "neighborhood": "Westside",
+        "taxExemptId": "501(c)(3) EIN: 72-1849201",
+        "dailyMeals": 120,
+        "coldStorageCapacity": "2 Double-Door Refrigerators, 1 Chest Freezer",
+        "transportTypes": [
+          "Cargo Minivan with Thermal Tubs"
+        ],
+        "description": "Providing emergency housing and warm meals for 40 unhoused families."
+      },
+      "verifiedStatus": "VERIFIED",
+      "createdAt": "2026-10-25T03:17:34.144Z"
+    },
+    {
+      "id": "user-admin-1",
+      "email": "admin@nourishnet.org",
+      "passwordHash": "$2b$10$/5c4PWR.A6He3p12HjciYuOCLehGTeGOIOlC65Yaz2z4I6xodLgJy",
+      "role": "ADMIN",
+      "name": "Elena Vance (Compliance Lead)",
+      "organizationDetails": {
+        "type": "NourishNet Food Safety & Administration Board",
+        "contactPerson": "Elena Vance",
+        "phone": "(555) 100-2000",
+        "address": "100 Federal Square, Suite 400",
+        "description": "Platform regulatory oversight, non-profit tax verification, and food safety standards."
+      },
+      "verifiedStatus": "VERIFIED",
+      "createdAt": "2026-10-20T23:17:34.144Z"
+    }
+  ],
+  "listings": [
+    {
+      "id": "list-1",
+      "donorId": "user-donor-1",
+      "donorName": "Grand Hotel Restaurant & Banquets",
+      "donorVerified": true,
+      "title": "Gourmet Herb-Roasted Chicken & Steamed Market Vegetables",
+      "description": "Fresh surplus from executive dinner banquet. Roasted bone-in chicken thighs with rosemary and garlic, served with honey-glazed carrots, steamed broccoli florets, and yukon potato mash. Blast-chilled according to health code standards.",
+      "category": "prepared",
+      "quantity": "45 portions (15 deep stainless pans)",
+      "estimatedMeals": 45,
+      "weightKg": 22.5,
+      "prepareTime": "2026-10-29T05:17:34.144Z",
+      "expiryTime": "2026-10-29T12:17:34.144Z",
+      "locationAddress": "450 Grand Avenue, Downtown Metro",
+      "neighborhood": "Downtown",
+      "storageType": "REFRIGERATED",
+      "dietaryTags": [
+        "gluten_free",
+        "dairy_free",
+        "halal"
+      ],
+      "allergens": [
+        "Garlic",
+        "No nuts",
+        "No gluten"
+      ],
+      "pickupWindowStart": "2026-10-29T07:47:34.144Z",
+      "pickupWindowEnd": "2026-10-29T11:17:34.144Z",
+      "pickupInstructions": "Dock B on rear courtyard alley. Bring heavy duty catering boxes or cambro insulated carriers.",
+      "imageUrl": "/src/assets/images/prepared_catering_meals_1793181937634.jpg",
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-29T05:17:34.144Z",
+      "updatedAt": "2026-10-29T05:17:34.144Z"
+    },
+    {
+      "id": "list-2",
+      "donorId": "user-donor-1",
+      "donorName": "Grand Hotel Restaurant & Banquets",
+      "donorVerified": true,
+      "title": "Artisan Continental Breakfast Pastries & Bagels",
+      "description": "Morning corporate conference surplus. Sealed bakery boxes with butter croissants, cinnamon rolls, blueberry danishes, and fresh NY style bagels.",
+      "category": "bakery",
+      "quantity": "40 assorted pastries & bagels",
+      "estimatedMeals": 40,
+      "weightKg": 8.5,
+      "prepareTime": "2026-10-29T02:17:34.144Z",
+      "expiryTime": "2026-10-29T23:17:34.144Z",
+      "locationAddress": "450 Grand Avenue, Downtown Metro",
+      "neighborhood": "Downtown",
+      "storageType": "AMBIENT",
+      "dietaryTags": [
+        "vegetarian"
+      ],
+      "allergens": [
+        "Wheat",
+        "Dairy",
+        "Eggs"
+      ],
+      "pickupWindowStart": "2026-10-29T07:17:34.144Z",
+      "pickupWindowEnd": "2026-10-29T11:17:34.144Z",
+      "pickupInstructions": "Kitchen entrance at Dock B. Inquire with sous-chef on duty.",
+      "imageUrl": "/src/assets/images/hero_surplus_food_1793181935977.jpg",
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-29T02:17:34.144Z",
+      "updatedAt": "2026-10-29T02:17:34.144Z"
+    },
+    {
+      "id": "list-3",
+      "donorId": "user-donor-2",
+      "donorName": "GreenValley Organic Mart",
+      "donorVerified": true,
+      "title": "Organic Farm Harvest Crates: Heirloom Tomatoes, Kale, Apples & Squash",
+      "description": "Wholesome organic farm surplus overstocked this morning. Includes 3 crates of ripe heirloom tomatoes, 2 crates of lacinato kale bunches, crisp gala apples, and butternut squash.",
+      "category": "produce",
+      "quantity": "8 wooden crates (approx. 90 kg)",
+      "estimatedMeals": 85,
+      "weightKg": 90,
+      "prepareTime": "2026-10-29T04:17:34.144Z",
+      "expiryTime": "2026-10-31T07:17:34.144Z",
+      "locationAddress": "1120 Harvest Boulevard, Midtown East",
+      "neighborhood": "Midtown",
+      "storageType": "AMBIENT",
+      "dietaryTags": [
+        "vegan",
+        "gluten_free",
+        "kosher",
+        "halal"
+      ],
+      "allergens": [
+        "None"
+      ],
+      "pickupWindowStart": "2026-10-29T08:17:34.144Z",
+      "pickupWindowEnd": "2026-10-29T15:17:34.144Z",
+      "pickupInstructions": "Back receiving bay 2. Forklift assistance available if picking up with a van or truck.",
+      "imageUrl": "/src/assets/images/fresh_produce_crates_1793181937574.jpg",
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-29T04:17:34.144Z",
+      "updatedAt": "2026-10-29T04:17:34.144Z"
+    },
+    {
+      "id": "list-4",
+      "donorId": "user-donor-2",
+      "donorName": "GreenValley Organic Mart",
+      "donorVerified": true,
+      "title": "Organic Whole & Almond Milk Cartons (Unopened)",
+      "description": "Fresh dairy and plant milk cartons within 5 days of code date. Rotated from display to make room for new pallet. Kept in continuous cold chain at 3°C.",
+      "category": "dairy",
+      "quantity": "48 half-gallon cartons (24 cow milk, 24 organic almond)",
+      "estimatedMeals": 50,
+      "weightKg": 45,
+      "prepareTime": "2026-10-29T03:17:34.144Z",
+      "expiryTime": "2026-11-01T07:17:34.144Z",
+      "locationAddress": "1120 Harvest Boulevard, Midtown East",
+      "neighborhood": "Midtown",
+      "storageType": "REFRIGERATED",
+      "dietaryTags": [
+        "vegetarian",
+        "kosher"
+      ],
+      "allergens": [
+        "Milk (Cow milk cartons)",
+        "Almonds (Almond milk cartons)"
+      ],
+      "pickupWindowStart": "2026-10-29T08:17:34.144Z",
+      "pickupWindowEnd": "2026-10-29T14:17:34.144Z",
+      "pickupInstructions": "Direct pickup from walk-in dairy staging room.",
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-29T03:17:34.144Z",
+      "updatedAt": "2026-10-29T03:17:34.144Z"
+    },
+    {
+      "id": "list-5",
+      "donorId": "user-donor-1",
+      "donorName": "Grand Hotel Restaurant & Banquets",
+      "donorVerified": true,
+      "title": "Mediterranean Penne Pasta with Braised Eggplant & San Marzano Sauce",
+      "description": "Chilled vegan pasta entree with roasted zucchini, kalamata olives, capers, fresh basil, and extra virgin olive oil.",
+      "category": "prepared",
+      "quantity": "30 generous meals",
+      "estimatedMeals": 30,
+      "weightKg": 16,
+      "prepareTime": "2026-10-29T04:17:34.144Z",
+      "expiryTime": "2026-10-29T13:17:34.144Z",
+      "locationAddress": "450 Grand Avenue, Downtown Metro",
+      "neighborhood": "Downtown",
+      "storageType": "REFRIGERATED",
+      "dietaryTags": [
+        "vegan",
+        "dairy_free",
+        "halal"
+      ],
+      "allergens": [
+        "Wheat"
+      ],
+      "pickupWindowStart": "2026-10-29T08:17:34.144Z",
+      "pickupWindowEnd": "2026-10-29T12:17:34.144Z",
+      "pickupInstructions": "Packaged in insulated thermal pans ready for immediate reheat or freezing.",
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-29T04:17:34.144Z",
+      "updatedAt": "2026-10-29T04:17:34.144Z"
+    }
+  ],
+  "requests": [
+    {
+      "id": "req-1",
+      "listingId": "list-1",
+      "listingTitle": "Gourmet Herb-Roasted Chicken & Steamed Market Vegetables",
+      "donorId": "user-donor-1",
+      "donorName": "Grand Hotel Restaurant & Banquets",
+      "recipientId": "user-recipient-1",
+      "recipientName": "Hope Community Kitchen",
+      "recipientPhone": "(555) 678-4321",
+      "requestedMeals": 45,
+      "pickupVolunteer": "David Miller (Staff Driver)",
+      "volunteerPhone": "(555) 301-4492",
+      "vehicleType": "Refrigerated Cargo Van (White Ford Transit)",
+      "pickupTime": "2026-10-29T08:47:34.144Z",
+      "notes": "For tonight’s 6:00 PM community dinner serving ~160 neighbors. We have cambro hot carriers.",
+      "status": "PENDING",
+      "pickupCode": "NOURISH-884",
+      "timestamp": "2026-10-29T06:17:34.144Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "log-1",
+      "adminId": "user-admin-1",
+      "adminName": "Elena Vance",
+      "action": "ORGANIZATION_VERIFIED",
+      "targetType": "USER",
+      "targetId": "user-donor-1",
+      "details": "Approved health permit & ServSafe certification for Grand Hotel Restaurant & Banquets.",
+      "timestamp": "2026-10-24T07:17:34.144Z"
+    },
+    {
+      "id": "log-2",
+      "adminId": "user-admin-1",
+      "adminName": "Elena Vance",
+      "action": "ORGANIZATION_VERIFIED",
+      "targetType": "USER",
+      "targetId": "user-recipient-1",
+      "details": "Verified 501(c)(3) tax exempt status for Hope Community Kitchen.",
+      "timestamp": "2026-10-23T01:17:34.144Z"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "NourishNet Food Donation Platform",
+  "description": "Production food donation and rescue coordination platform connecting donors, recipient charities, and platform admins.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
