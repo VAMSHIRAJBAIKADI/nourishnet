@@ -119,9 +119,54 @@
       },
       "verifiedStatus": "VERIFIED",
       "createdAt": "2026-10-20T23:17:34.144Z"
+    },
+    {
+      "id": "user-1793261209740",
+      "email": "vamshiraj1100@gmail.com",
+      "passwordHash": "$2b$10$di/N5NCpG67EYZjSBBIHDuQffmJHcNCqbK/5Pqdm6qxc0nRfwo0tG",
+      "role": "ADMIN",
+      "name": "Vamshi Raj Baikadi",
+      "organizationDetails": {
+        "type": "NIAT",
+        "contactPerson": "Vamshi Raj Baikadi",
+        "phone": "",
+        "address": "420 BANGLORE"
+      },
+      "verifiedStatus": "VERIFIED",
+      "createdAt": "2026-10-29T08:06:49.740Z"
     }
   ],
   "listings": [
+    {
+      "id": "list-1793261157511",
+      "donorId": "user-donor-1",
+      "donorName": "Grand Hotel Restaurant & Banquets",
+      "donorVerified": true,
+      "title": "Roasted Salmon Fillets & Quinoa Rice Pilaf",
+      "description": "Surplus from executive dinner event. Flash-chilled within 90 minutes in food-safe stainless pans. Served with grilled asparagus.",
+      "category": "prepared",
+      "quantity": "35 boxed meal trays",
+      "estimatedMeals": 35,
+      "weightKg": 18,
+      "prepareTime": "2026-10-29T02:27:00.000Z",
+      "expiryTime": "2026-10-29T08:27:00.000Z",
+      "locationAddress": "450 Grand Avenue, Downtown Metro",
+      "neighborhood": "Downtown",
+      "storageType": "REFRIGERATED",
+      "dietaryTags": [
+        "gluten_free",
+        "dairy_free"
+      ],
+      "allergens": [
+        "Fish (Salmon)"
+      ],
+      "pickupWindowStart": "2026-10-29T02:57:00.000Z",
+      "pickupWindowEnd": "2026-10-29T07:27:00.000Z",
+      "pickupInstructions": "Service Dock B. Ring bell for pantry steward.",
+      "status": "AVAILABLE",
+      "createdAt": "2026-10-29T08:05:57.511Z",
+      "updatedAt": "2026-10-29T08:05:57.511Z"
+    },
     {
       "id": "list-1",
       "donorId": "user-donor-1",

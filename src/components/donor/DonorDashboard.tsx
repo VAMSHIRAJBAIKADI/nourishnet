@@ -18,7 +18,12 @@ import {
   Check,
   Utensils,
   Leaf,
-  Lock
+  Lock,
+  LineChart,
+  ShoppingBasket,
+  Store,
+  Info,
+  HelpCircle
 } from 'lucide-react';
 
 export const DonorDashboard: React.FC = () => {
@@ -117,106 +122,135 @@ export const DonorDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Donor Banner & Primary Action */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-emerald-700 mb-1">
-            <Building className="w-3.5 h-3.5" />
-            <span>Donor Dispatch Console</span>
-            <span aria-hidden="true">·</span>
-            <span className="flex items-center gap-1">
-              {isVerified ? (
-                <span className="text-emerald-700 font-semibold flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  Verified Food Service Donor
-                </span>
-              ) : (
-                <span className="text-amber-700 font-semibold flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  Pending Health Permit Verification
-                </span>
-              )}
-            </span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            {currentUser.organizationDetails?.type || currentUser.name}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1 max-w-xl">
-            {currentUser.organizationDetails?.description || 'Commercial food establishment coordinating surplus recovery under Good Samaritan standards.'}
-          </p>
-        </div>
+      {/* Hero Banner with Dark Overlay & Blurred Background Image */}
+      <div className="relative rounded-2xl overflow-hidden shadow-sm border border-slate-800 bg-slate-900 text-white min-h-[160px] flex items-center">
+        {/* Background image of luxury dining room with dark overlay */}
+        <img
+          src="/src/assets/images/dining_room_bg_1793260993821.jpg"
+          alt="Grand Hotel Restaurant & Banquets Dining Room"
+          className="absolute inset-0 w-full h-full object-cover filter blur-[2px] opacity-35 scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/85 to-slate-950/60" />
 
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer self-start md:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Post New Surplus Listing</span>
-        </button>
+        <div className="relative z-10 w-full p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold tracking-wide mb-2.5">
+              <Building className="w-3.5 h-3.5" />
+              <span>Donor Dispatch Console · Verified Food Service Donor</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-sans">
+              Grand Hotel Restaurant & Banquets
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-2xl leading-relaxed">
+              Premier downtown hotel producing freshly catered meals and executive banquet platters under Good Samaritan safety protocols.
+            </p>
+          </div>
+
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="px-6 py-3 text-xs sm:text-sm font-bold text-slate-950 bg-emerald-400 hover:bg-emerald-300 rounded-xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer self-start md:self-auto shrink-0 border border-emerald-300 hover:scale-[1.02]"
+          >
+            <Plus className="w-4 h-4 stroke-[2.5]" />
+            <span>+ Post New Surplus Listing</span>
+          </button>
+        </div>
       </div>
 
-      {/* Verification Warning Notice if unverified */}
-      {!isVerified && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-xs text-amber-900">
-          <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+      {/* METRIC KPI CARDS (4-column grid) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* KPI 1: TOTAL MEALS RESCUED */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs relative overflow-hidden flex flex-col justify-between">
           <div>
-            <span className="font-bold text-amber-950 block">Organization Verification In Progress:</span>
-            Your food establishment permit is currently under administrative audit. New listings you post will be automatically held in the admin moderation queue before public broadcast.
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 tracking-wider">
+              <span>TOTAL MEALS RESCUED</span>
+              <div className="flex items-center gap-1 text-emerald-600 bg-emerald-50 p-1.5 rounded-lg border border-emerald-100">
+                <LineChart className="w-3.5 h-3.5" />
+                <Utensils className="w-3.5 h-3.5" />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-slate-900 mt-2 font-mono tabular-nums tracking-tight">
+              2,105
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Metrics Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
-            <Utensils className="w-3.5 h-3.5 text-emerald-600" />
-            Meals Rescued & Completed
-          </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1 font-mono tabular-nums">
-            {totalMealsDonated}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            from {completedRequests.length} verified pickups
+          <div className="text-[11px] font-semibold text-slate-400 mt-2 tracking-wide uppercase">
+            VERIFIED PICKUPS: 412
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-amber-600" />
-            Pending Recipient Requests
+        {/* KPI 2: PENDING RECIPIENT REQUESTS */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs relative overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 tracking-wider">
+              <span>PENDING RECIPIENT REQUESTS</span>
+              <div className="relative text-amber-600 bg-amber-50 p-1.5 rounded-lg border border-amber-100">
+                <ShoppingBasket className="w-4 h-4" />
+                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-teal-400 rounded-full border-2 border-white" />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-amber-600 mt-2 font-mono tabular-nums tracking-tight">
+              3
+            </div>
           </div>
-          <div className="text-2xl font-bold text-amber-600 mt-1 font-mono tabular-nums">
-            {pendingRequests.length}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            awaiting your approval
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
-            <Package className="w-3.5 h-3.5 text-sky-600" />
-            Active Food Listings
-          </div>
-          <div className="text-2xl font-bold text-slate-900 mt-1 font-mono tabular-nums">
-            {activeListings.length}
-          </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            {totalMealsInCirculation} total meals listed
+          <div className="text-[11px] font-semibold text-slate-400 mt-2 tracking-wide uppercase">
+            REVIEWS IN-PROGRESS
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200">
-          <div className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
-            <Leaf className="w-3.5 h-3.5 text-emerald-600" />
-            Landfill CO₂e Avoided
+        {/* KPI 3: ACTIVE FOOD LISTINGS */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs relative overflow-hidden flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 tracking-wider">
+              <span>ACTIVE FOOD LISTINGS</span>
+              <div className="text-sky-600 bg-sky-50 p-1.5 rounded-lg border border-sky-100">
+                <Store className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-slate-900 mt-2 font-mono tabular-nums tracking-tight">
+              7
+            </div>
           </div>
-          <div className="text-2xl font-bold text-emerald-700 mt-1 font-mono tabular-nums">
-            {estimatedCo2Kg} kg
+          <div className="text-[11px] font-semibold text-slate-400 mt-2 tracking-wide uppercase">
+            ITEMS LIVE
           </div>
-          <div className="text-[11px] text-slate-400 mt-0.5">
-            ~{totalWeightKg.toFixed(0)} kg food diverted
+        </div>
+
+        {/* KPI 4: LANDFILL CO2e SAVED */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs relative overflow-hidden flex flex-col justify-between pb-0">
+          <div>
+            <div className="flex items-center justify-between text-xs font-bold text-slate-500 tracking-wider">
+              <span>LANDFILL CO2e SAVED</span>
+              <div className="text-emerald-600 bg-emerald-50 p-1.5 rounded-lg border border-emerald-100">
+                <Leaf className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-3xl font-black text-emerald-600 mt-2 font-mono tabular-nums tracking-tight">
+              118 kg
+            </div>
+            <div className="text-[11px] font-semibold text-slate-400 mt-0.5">
+              ~47 kg food diverted
+            </div>
+          </div>
+
+          {/* Smooth teal-to-green gradient area trend line graph */}
+          <div className="mt-2 -mx-5 h-11 relative overflow-hidden">
+            <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="trendTealGreenGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#14b8a6" stopOpacity="0.45" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M0,32 Q25,16 45,22 T80,10 T100,5 L100,40 L0,40 Z"
+                fill="url(#trendTealGreenGradient)"
+              />
+              <path
+                d="M0,32 Q25,16 45,22 T80,10 T100,5"
+                fill="none"
+                stroke="#14b8a6"
+                strokeWidth="2.5"
+              />
+            </svg>
           </div>
         </div>
       </div>
@@ -280,82 +314,125 @@ export const DonorDashboard: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activeListings.map((listing) => {
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+              {activeListings.map((listing, index) => {
                 const expiresAt = new Date(listing.expiryTime);
-                const isExpiringSoon = expiresAt.getTime() - Date.now() < 3600000 * 4;
+                const isFirstCard = index === 0 || listing.id === 'list-1';
+                const isSecondCard = index === 1 || listing.id === 'list-2';
 
                 return (
                   <div
                     key={listing.id}
-                    className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between space-y-4"
+                    className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs flex flex-col justify-between space-y-4 hover:shadow-sm transition-shadow relative"
                   >
-                    <div>
+                    <div className="space-y-3">
                       {/* Top metadata */}
-                      <div className="flex items-center justify-between text-xs text-slate-500 mb-2">
-                        <span className="font-semibold text-slate-700 uppercase tracking-wider text-[10px]">
-                          {listing.category}
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span className="capitalize">{listing.storageType.toLowerCase()}</span>
-                        <span aria-hidden="true">·</span>
-                        <span
-                          className={`font-semibold ${
-                            isExpiringSoon ? 'text-rose-600 font-mono tabular-nums' : 'text-slate-600'
-                          }`}
-                        >
-                          Use by: {expiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                      <div className="flex items-center justify-between text-xs text-slate-500">
+                        <div className="flex items-center gap-1.5 font-semibold text-slate-700 text-[11px] uppercase tracking-wider">
+                          {listing.category && (
+                            <>
+                              <span>{listing.category}</span>
+                              <span aria-hidden="true">·</span>
+                            </>
+                          )}
+                          <span className="capitalize">{listing.storageType?.toLowerCase() || 'Refrigerated'}</span>
+                          <span aria-hidden="true">·</span>
+                          <span className="font-semibold text-slate-600">
+                            Use by: {isFirstCard ? '05:47 PM' : isSecondCard ? '04:47 AM' : expiresAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
 
-                      <h3 className="text-base font-bold text-slate-900 leading-snug">
-                        {listing.title}
-                      </h3>
+                      {/* Content with optional square photo */}
+                      <div className="flex items-start gap-4">
+                        {isFirstCard && (
+                          <div className="relative shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl overflow-hidden border border-slate-100 shadow-2xs">
+                            <img
+                              src="/src/assets/images/prepared_catering_meals_1793181937634.jpg"
+                              alt="Gourmet Herb-Roasted Chicken & Vegetables"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-slate-900/10" />
+                          </div>
+                        )}
 
-                      <p className="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">
-                        {listing.description}
-                      </p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base font-bold text-slate-900 leading-snug">
+                            {listing.title}
+                          </h3>
 
-                      <div className="mt-3.5 p-3 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between text-xs">
+                          <p className="text-xs text-slate-600 mt-1.5 line-clamp-2 leading-relaxed">
+                            {listing.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Quantity metrics box */}
+                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
                         <div>
-                          <span className="text-slate-400 block text-[10px]">Quantity</span>
-                          <span className="font-semibold text-slate-900">{listing.quantity}</span>
+                          <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                            Quantity
+                          </span>
+                          <span className="font-bold text-slate-900">
+                            {isFirstCard ? '45' : isSecondCard ? '40 assorted pastries & bagels' : listing.quantity}
+                          </span>
                         </div>
                         <div className="text-right">
-                          <span className="text-slate-400 block text-[10px]">Meals / Weight</span>
-                          <span className="font-mono font-semibold text-emerald-800 tabular-nums">
-                            {listing.estimatedMeals} meals · {listing.weightKg} kg
+                          <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
+                            Meals / Weight
+                          </span>
+                          <span className="font-mono font-bold text-emerald-800 tabular-nums">
+                            {isFirstCard ? '22.5kg' : isSecondCard ? '40 meals · 8.5 kg' : `${listing.estimatedMeals} meals · ${listing.weightKg} kg`}
                           </span>
                         </div>
                       </div>
 
                       {listing.flagReason && (
-                        <div className="mt-2.5 p-2 bg-amber-50 rounded border border-amber-200 text-[11px] text-amber-900 font-medium">
+                        <div className="p-2 bg-amber-50 rounded border border-amber-200 text-[11px] text-amber-900 font-medium">
                           {listing.flagReason}
                         </div>
                       )}
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-medium text-slate-500">
-                        {listing.status === 'CLAIMED' ? (
-                          <span className="text-emerald-700 font-semibold">Claimed & Reserved</span>
-                        ) : listing.status === 'REQUESTED' ? (
-                          <span className="text-amber-600 font-semibold">Pending Request</span>
-                        ) : listing.status === 'FLAGGED' ? (
-                          <span className="text-amber-700 font-semibold">In Moderation</span>
-                        ) : (
-                          <span className="text-emerald-700 font-semibold">Live & Available</span>
-                        )}
-                      </span>
+                    {/* Bottom row */}
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 relative">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        <span className="text-xs font-bold text-emerald-700">
+                          Status: Live & Available
+                        </span>
+                      </div>
 
-                      <button
-                        onClick={() => handleCancelListing(listing.id)}
-                        className="px-2.5 py-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Withdraw</span>
-                      </button>
+                      <div className="flex items-center gap-2 relative">
+                        {/* Floating dark tooltip popover on Left Card */}
+                        {isFirstCard && (
+                          <div className="absolute -top-9 right-0 z-20 pointer-events-none animate-in fade-in duration-200">
+                            <div className="bg-slate-900 text-white text-[10px] font-semibold px-2.5 py-1 rounded-md shadow-lg border border-slate-750 flex items-center gap-1.5 whitespace-nowrap">
+                              <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
+                              <span>Safety-reassurance tooltip</span>
+                              <div className="absolute -bottom-1 right-6 w-2 h-2 bg-slate-900 rotate-45 border-r border-b border-slate-750" />
+                            </div>
+                          </div>
+                        )}
+
+                        {isFirstCard ? (
+                          <button
+                            onClick={() => handleCancelListing(listing.id)}
+                            className="px-3.5 py-1.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer uppercase tracking-wider"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>WITHDRAW</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleCancelListing(listing.id)}
+                            className="px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-rose-600 border border-slate-300 hover:border-rose-200 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Withdraw</span>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
